@@ -1,5 +1,6 @@
 "use strict";
 
+import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -22,10 +23,19 @@ export class HistoryRecorder {
   }
 
   SaveHistory(historyItem: HistoryItem) {
+    let config = vscode.workspace.getConfiguration();
+    let maxHistory: number | undefined = config.get(
+      "rethinkdbExplorer.maxHistory"
+    );
+
     if (!this._history) {
       this._history = [];
     }
     this._history.push(historyItem);
+
+    if (this._history.length > (maxHistory || 50)) {
+      this._history.splice(0, this._history.length - (maxHistory || 50));
+    }
 
     if (!fs.existsSync(this._settingPath)) {
       fs.mkdirSync(this._settingPath, { recursive: true });
