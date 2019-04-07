@@ -26,7 +26,13 @@ export class RethinkCompletionProvider
     items: vscode.CompletionItem[]
   ): vscode.CompletionItem[] {
     for (var property in obj) {
-      items.push(new vscode.CompletionItem(property));
+      let newCompletionItem = new vscode.CompletionItem(property);
+      if (typeof obj[property] === "function") {
+        newCompletionItem.kind = vscode.CompletionItemKind.Method;
+      } else {
+        newCompletionItem.kind = vscode.CompletionItemKind.Property;
+      }
+      items.push(newCompletionItem);
     }
     if (obj.__proto__) {
       items = this.getAllFunctions(obj.__proto__, items);
