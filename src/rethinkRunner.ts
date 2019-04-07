@@ -8,6 +8,9 @@ export class RethinkRunner {
     let results;
     let connection: Connection | undefined;
     if (query) {
+      if (query.includes(".run(")) {
+        throw new Error("Query cannot contain the run() command");
+      }
       try {
         let config = vscode.workspace.getConfiguration();
         let host: string | undefined = config.get("rethinkdbExplorer.host");

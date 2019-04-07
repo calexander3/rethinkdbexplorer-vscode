@@ -9,6 +9,7 @@ import {
 } from "./previousQueryProvider";
 import { HistoryRecorder } from "./historyRecorder";
 import { JsonResultViewer } from "./jsonResultViewer";
+import { RethinkCompletionProvider } from "./rethinkCompletionProvider";
 
 let executeQueryStatusBarItem: vscode.StatusBarItem;
 let outputChannel: vscode.OutputChannel;
@@ -19,6 +20,14 @@ let tableResultViewer = new TableResultViewer();
 let jsonResultsViewer = new JsonResultViewer();
 
 export function activate(context: vscode.ExtensionContext) {
+  context.subscriptions.push(
+    vscode.languages.registerCompletionItemProvider(
+      "rethinkdb",
+      new RethinkCompletionProvider(),
+      "."
+    )
+  );
+
   let historyRecorder = new HistoryRecorder(context.globalStoragePath);
   let previousQueryProvider = new PreviousQueryProvider(historyRecorder);
   outputChannel = vscode.window.createOutputChannel("RethinkDB Explorer");

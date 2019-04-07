@@ -2,12 +2,21 @@
   "name": "rethinkdbexplorer",
   "displayName": "RethinkDb Explorer",
   "description": "A better version of the web interface",
-  "version": "0.0.1",
+  "publisher": "calexander3",
+  "license": "MIT",
+  "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/calexander3/rethinkdbexplorer-vscode.git"
+  },
   "engines": {
     "vscode": "^1.33.0"
   },
   "categories": [
     "Other"
+  ],
+  "keywords": [
+    "RethinkDB"
   ],
   "activationEvents": [
     "*"
@@ -140,6 +149,8 @@
     "@types/mocha": "^2.2.42"
   },
   "dependencies": {
+    "@types/rethinkdb": "^2.3.14",
+    "rethinkdb": "^2.3.3",
     "rethinkdb-ts": "^2.4.0-rc.13"
   }
 }
