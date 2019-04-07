@@ -2,19 +2,21 @@
 
 import * as vscode from "vscode";
 import { RethinkRunner } from "./rethinkRunner";
-import { ResultViewer } from "./resultViewer";
+import { TableResultViewer } from "./tableResultViewer";
 import {
   PreviousQueryProvider,
   PreviousQueryHeader
 } from "./previousQueryProvider";
 import { HistoryRecorder } from "./historyRecorder";
+import { JsonResultViewer } from "./jsonResultViewer";
 
 let executeQueryStatusBarItem: vscode.StatusBarItem;
 let outputChannel: vscode.OutputChannel;
 let executeQueryButtonText: string = `$(play) Execute Query`;
 let running: boolean;
 let runner = new RethinkRunner();
-let resultsViewer = new ResultViewer();
+let tableResultViewer = new TableResultViewer();
+let jsonResultsViewer = new JsonResultViewer();
 
 export function activate(context: vscode.ExtensionContext) {
   let historyRecorder = new HistoryRecorder(context.globalStoragePath);
@@ -42,7 +44,6 @@ export function activate(context: vscode.ExtensionContext) {
               let executionTime =
                 dateExecuted.getTime() - dateStarted.getTime();
               outputChannel.appendLine(`${query} took ${executionTime}ms`);
-              outputChannel.appendLine(JSON.stringify(results, null, 4));
               outputChannel.show(true);
               historyRecorder.SaveHistory({
                 query,
@@ -51,11 +52,18 @@ export function activate(context: vscode.ExtensionContext) {
                 executionTime,
                 rowCount: Array.isArray(results) ? results.length : undefined
               });
-              resultsViewer.RenderResults(
+              let tableView = tableResultViewer.RenderResults(
                 currentTextEditor.document.fileName,
                 results,
-                dateExecuted
+                dateExecuted,
+                vscode.ViewColumn.Beside
               );
+              await jsonResultsViewer.RenderResults(
+                currentTextEditor.document.fileName,
+                results,
+                tableView.viewColumn || vscode.ViewColumn.Beside
+              );
+
               previousQueryProvider.refresh();
             }
           } catch (e) {
@@ -93,22 +101,25 @@ export function activate(context: vscode.ExtensionContext) {
             item.historyItem.executionTime
           }ms on ${queryDate.toLocaleDateString()} ${queryDate.toLocaleTimeString()}`
         );
-        outputChannel.appendLine(
-          JSON.stringify(item.historyItem.dataReturned, null, 4)
-        );
         outputChannel.show(true);
         let document = await vscode.workspace.openTextDocument({
           language: "rethinkdb",
           content: item.historyItem.query
         });
-        let editor = await vscode.window.showTextDocument(
-          document,
-          vscode.ViewColumn.One
-        );
-        resultsViewer.RenderResults(
+        let editor = await vscode.window.showTextDocument(document, {
+          viewColumn: vscode.ViewColumn.One,
+          preserveFocus: false
+        });
+        let tableView = tableResultViewer.RenderResults(
           editor.document.fileName,
           item.historyItem.dataReturned,
-          new Date(item.historyItem.dateExecuted)
+          new Date(item.historyItem.dateExecuted),
+          vscode.ViewColumn.Beside
+        );
+        await jsonResultsViewer.RenderResults(
+          editor.document.fileName,
+          item.historyItem.dataReturned,
+          tableView.viewColumn || vscode.ViewColumn.Beside
         );
       }
     )
@@ -128,7 +139,12 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.workspace.onDidOpenTextDocument(e => {
       if (e && e.languageId === "rethinkdb") {
         executeQueryStatusBarItem.show();
-      } else if (!e || e.languageId !== "Log") {
+      } else if (
+        !(
+          (e && e.languageId === "Log") ||
+          (e.isUntitled && e.languageId === "json")
+        )
+      ) {
         executeQueryStatusBarItem.hide();
       }
     })
@@ -150,6 +166,4 @@ function displayError(error: Error) {
   }
 }
 
-export function deactivate() {
-  executeQueryStatusBarItem.hide();
-}
+export function deactivate() {}

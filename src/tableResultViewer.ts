@@ -2,19 +2,20 @@
 
 import * as vscode from "vscode";
 
-export class ResultViewer {
+export class TableResultViewer {
   private _panels: { [id: string]: vscode.WebviewPanel } = {};
 
   RenderResults(
     docName: string,
     results: any[],
-    resultDate: Date
+    resultDate: Date,
+    viewColumn: vscode.ViewColumn
   ): vscode.WebviewPanel {
     if (!this._panels[docName]) {
       let webView = vscode.window.createWebviewPanel(
         "results",
-        `${docName} Results`,
-        { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true },
+        `${docName} Table`,
+        { viewColumn: viewColumn, preserveFocus: true },
         {
           enableFindWidget: true,
           retainContextWhenHidden: true,
@@ -53,7 +54,7 @@ export class ResultViewer {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Results</title>
+        <title>Table</title>
         <style>
         th {
             text-align: left;
@@ -78,7 +79,6 @@ export class ResultViewer {
         </table>
     </body>
     </html>`;
-    this._panels[docName].reveal(vscode.ViewColumn.Beside, true);
     return this._panels[docName];
   }
 }
