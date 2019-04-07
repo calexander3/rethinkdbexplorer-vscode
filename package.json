@@ -11,7 +11,7 @@
   },
   "icon": "RethinkExplorer.png",
   "galleryBanner": {
-    "color": "#eff1f3",
+    "color": "#808080",
     "theme": "dark"
   },
   "engines": {
