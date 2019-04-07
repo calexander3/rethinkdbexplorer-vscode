@@ -1,5 +1,6 @@
 "use strict";
 
+import * as vscode from "vscode";
 import { r, Connection } from "rethinkdb-ts";
 
 export class RethinkRunner {
@@ -8,10 +9,30 @@ export class RethinkRunner {
     let connection: Connection | undefined;
     if (query) {
       try {
+        let config = vscode.workspace.getConfiguration();
+        let host: string | undefined = config.get("rethinkdbExplorer.host");
+        let portNumber: number | undefined = config.get(
+          "rethinkdbExplorer.port"
+        );
+        let database: string | undefined = config.get(
+          "rethinkdbExplorer.database"
+        );
+        let tlsConnection: boolean | undefined = config.get(
+          "rethinkdbExplorer.tls"
+        );
+        let username: string | undefined = config.get(
+          "rethinkdbExplorer.username"
+        );
+        let password: string | undefined = config.get(
+          "rethinkdbExplorer.password"
+        );
         connection = await r.connect({
-          host: "localhost",
-          port: 28015,
-          db: "test"
+          host: host || "localhost",
+          port: portNumber || 28015,
+          db: !!database ? database : undefined,
+          tls: tlsConnection || false,
+          user: !!username ? username : undefined,
+          password: !!password ? password : undefined
         });
 
         let parsedQuery = new Function("r", `return ${query}`).call(this, r);

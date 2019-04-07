@@ -1,6 +1,6 @@
 {
   "name": "rethinkdbexplorer",
-  "displayName": "RethinkDbExplorer",
+  "displayName": "RethinkDb Explorer",
   "description": "A better version of the web interface",
   "version": "0.0.1",
   "engines": {
@@ -13,6 +13,47 @@
     "*"
   ],
   "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "RethinkDB Explorer Configuration",
+      "properties": {
+        "rethinkdbExplorer.host": {
+          "type": "string",
+          "default": "localhost",
+          "description": "Address of the RethinkDB server to connect to."
+        },
+        "rethinkdbExplorer.port": {
+          "type": "number",
+          "default": 28015,
+          "description": "Specifies the port the RethinkDB server is listening on."
+        },
+        "rethinkdbExplorer.database": {
+          "type": "string",
+          "default": "",
+          "description": "Default database to connect to."
+        },
+        "rethinkdbExplorer.username": {
+          "type": "string",
+          "default": "",
+          "description": "Username to use when connecting to the RethinkDB server."
+        },
+        "rethinkdbExplorer.password": {
+          "type": "string",
+          "default": "",
+          "description": "Password to use when connecting to the RethinkDB server."
+        },
+        "rethinkdbExplorer.tls": {
+          "type": "boolean",
+          "default": false,
+          "description": "Connect to RethinkDB over a tls connection"
+        },
+        "rethinkdbExplorer.maxHistory": {
+          "type": "number",
+          "default": 50,
+          "description": "How many previous queries to save"
+        }
+      }
+    },
     "languages": [
       {
         "id": "rethinkdb",
@@ -42,6 +83,7 @@
     "keybindings": [
       {
         "key": "ctrl+shift+r",
+        "mac": "cmd+shift+r",
         "command": "rethinkdbExplorer.runQuery"
       }
     ],
