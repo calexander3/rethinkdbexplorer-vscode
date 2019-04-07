@@ -9,6 +9,11 @@
     "type": "git",
     "url": "https://github.com/calexander3/rethinkdbexplorer-vscode.git"
   },
+  "icon": "RethinkExplorer.png",
+  "galleryBanner": {
+    "color": "#eff1f3",
+    "theme": "dark"
+  },
   "engines": {
     "vscode": "^1.33.0"
   },
