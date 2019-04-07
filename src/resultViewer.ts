@@ -11,16 +11,21 @@ export class ResultViewer {
     resultDate: Date
   ): vscode.WebviewPanel {
     if (!this.panels[docName]) {
-      this.panels[docName] = vscode.window.createWebviewPanel(
+      let webView = vscode.window.createWebviewPanel(
         "results",
         `${docName} Results`,
-        vscode.ViewColumn.Active,
+        vscode.ViewColumn.Beside,
         {
           enableFindWidget: true,
           retainContextWhenHidden: true,
           localResourceRoots: []
         }
       );
+      let internalDocName = docName;
+      webView.onDidDispose(() => {
+        delete this.panels[internalDocName];
+      });
+      this.panels[docName] = webView;
     }
 
     let resultsTable: string[] = ["<tr>"];
