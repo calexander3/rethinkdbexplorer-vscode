@@ -87,6 +87,14 @@
           "light": "media/light/refresh.svg",
           "dark": "media/dark/refresh.svg"
         }
+      },
+      {
+        "command": "rethinkdbExplorer.deleteHistory",
+        "title": "Delete RethinDB Query History",
+        "icon": {
+          "light": "media/light/discard.svg",
+          "dark": "media/dark/discard.svg"
+        }
       }
     ],
     "keybindings": [
@@ -112,6 +120,13 @@
           "command": "rethinkdbExplorer.restoreHistoryItem",
           "when": "view == rethinkdbexplorerhistory && viewItem == previousQueryHeader",
           "group": "inline"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "rethinkdbExplorer.deleteHistory",
+          "when": "view == rethinkdbexplorerhistory",
+          "group": "navigation"
         }
       ]
     },

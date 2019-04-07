@@ -135,6 +135,23 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "rethinkdbExplorer.deleteHistory",
+      async () => {
+        let response = await vscode.window.showWarningMessage(
+          "Are you sure you wish to delete your saved queries?",
+          "Yes",
+          "No"
+        );
+        if (response === "Yes") {
+          historyRecorder.RemoveHistory();
+          previousQueryProvider.refresh();
+        }
+      }
+    )
+  );
+
+  context.subscriptions.push(
     vscode.window.onDidChangeActiveTextEditor(e => {
       if (e && e.document.languageId === "rethinkdb") {
         executeQueryStatusBarItem.show();

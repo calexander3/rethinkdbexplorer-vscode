@@ -46,6 +46,16 @@ export class HistoryRecorder {
       JSON.stringify(this._history)
     );
   }
+
+  RemoveHistory() {
+    if (fs.existsSync(path.join(this._settingPath, this.fileName))) {
+      fs.writeFileSync(
+        path.join(this._settingPath, this.fileName),
+        JSON.stringify([])
+      );
+    }
+    this._history = [];
+  }
 }
 
 export interface HistoryItem {
