@@ -1,7 +1,7 @@
 {
   "name": "rethinkdbexplorer",
   "displayName": "RethinkDb Explorer",
-  "description": "A better version of the web interface",
+  "description": "An extension to allow you to query your RethinkDB server from right inside your favorite editor",
   "publisher": "calexander3",
   "license": "MIT",
   "version": "1.0.0",
@@ -73,6 +73,13 @@
           "RethinkDB"
         ],
         "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "rethinkdb",
+        "scopeName": "source.js",
+        "path": "./syntaxes/javascript.json"
       }
     ],
     "commands": [
