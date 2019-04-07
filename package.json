@@ -1,0 +1,65 @@
+{
+  "name": "rethinkdbexplorer",
+  "displayName": "RethinkDbExplorer",
+  "description": "A better version of the web interface",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.33.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:rethinkdb",
+    "*"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "rethinkdb",
+        "extensions": [
+          ".rt"
+        ],
+        "aliases": [
+          "RethinkDB"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "rethinkdbexplorer",
+          "title": "RethinkDB Explorer",
+          "icon": "media/rethinkdb.svg"
+        }
+      ]
+    },
+    "views": {
+      "rethinkdbexplorer": [
+        {
+          "id": "rethinkdbexplorerhistory",
+          "name": "RethinkDB Query History"
+        }
+      ]
+    }
+  },
+  "main": "./out/extension.js",
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "test": "npm run compile && node ./node_modules/vscode/bin/test"
+  },
+  "devDependencies": {
+    "typescript": "^3.4.2",
+    "vscode": "^1.1.33",
+    "tslint": "^5.12.1",
+    "@types/node": "^10.12.21",
+    "@types/mocha": "^2.2.42"
+  },
+  "dependencies": {
+    "rethinkdb-ts": "^2.4.0-rc.13"
+  }
+}
