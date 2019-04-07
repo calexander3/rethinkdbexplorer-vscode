@@ -52,5 +52,6 @@ export interface HistoryItem {
   query: string;
   dateExecuted: Date;
   dataReturned: any;
+  executionTime: number;
   rowCount?: number;
 }
