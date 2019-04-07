@@ -35,6 +35,7 @@ export function activate(context: vscode.ExtensionContext) {
               if (results instanceof Error) {
                 displayError(results);
               } else {
+                outputChannel.appendLine(query);
                 outputChannel.appendLine(JSON.stringify(results, null, 4));
                 outputChannel.show(true);
                 let dateExecuted = new Date();

@@ -10,7 +10,6 @@
     "Other"
   ],
   "activationEvents": [
-    "onLanguage:rethinkdb",
     "*"
   ],
   "contributes": {
@@ -26,6 +25,26 @@
         "configuration": "./language-configuration.json"
       }
     ],
+    "commands": [
+      {
+        "command": "rethinkdbExplorer.runQuery",
+        "title": "Execute RethinkDB Query"
+      }
+    ],
+    "keybindings": [
+      {
+        "key": "ctrl+shift+r",
+        "command": "rethinkdbExplorer.runQuery"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "rethinkdbExplorer.runQuery",
+          "when": "editorLangId == rethinkdb"
+        }
+      ]
+    },
     "viewsContainers": {
       "activitybar": [
         {

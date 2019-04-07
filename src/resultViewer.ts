@@ -14,7 +14,7 @@ export class ResultViewer {
       let webView = vscode.window.createWebviewPanel(
         "results",
         `${docName} Results`,
-        vscode.ViewColumn.Beside,
+        { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true },
         {
           enableFindWidget: true,
           retainContextWhenHidden: true,
@@ -69,7 +69,7 @@ export class ResultViewer {
         </table>
     </body>
     </html>`;
-    this.panels[docName].reveal();
+    this.panels[docName].reveal(vscode.ViewColumn.Beside, true);
     return this.panels[docName];
   }
 }
