@@ -29,7 +29,7 @@ export class HistoryRecorder {
     );
 
     if (!this._history) {
-      this._history = [];
+      this._history = this.LoadHistory();
     }
     this._history.push(historyItem);
 
