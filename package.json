@@ -29,6 +29,14 @@
       {
         "command": "rethinkdbExplorer.runQuery",
         "title": "Execute RethinkDB Query"
+      },
+      {
+        "command": "rethinkdbExplorer.restoreHistoryItem",
+        "title": "Restore History Item",
+        "icon": {
+          "light": "media/light/refresh.svg",
+          "dark": "media/dark/refresh.svg"
+        }
       }
     ],
     "keybindings": [
@@ -42,6 +50,17 @@
         {
           "command": "rethinkdbExplorer.runQuery",
           "when": "editorLangId == rethinkdb"
+        },
+        {
+          "command": "rethinkdbExplorer.restoreHistoryItem",
+          "when": "false"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "rethinkdbExplorer.restoreHistoryItem",
+          "when": "view == rethinkdbexplorerhistory && viewItem == previousQueryHeader",
+          "group": "inline"
         }
       ]
     },

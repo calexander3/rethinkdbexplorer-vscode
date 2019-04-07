@@ -3,14 +3,14 @@
 import * as vscode from "vscode";
 
 export class ResultViewer {
-  panels: { [id: string]: vscode.WebviewPanel } = {};
+  private _panels: { [id: string]: vscode.WebviewPanel } = {};
 
   RenderResults(
     docName: string,
     results: any[],
     resultDate: Date
   ): vscode.WebviewPanel {
-    if (!this.panels[docName]) {
+    if (!this._panels[docName]) {
       let webView = vscode.window.createWebviewPanel(
         "results",
         `${docName} Results`,
@@ -23,9 +23,9 @@ export class ResultViewer {
       );
       let internalDocName = docName;
       webView.onDidDispose(() => {
-        delete this.panels[internalDocName];
+        delete this._panels[internalDocName];
       });
-      this.panels[docName] = webView;
+      this._panels[docName] = webView;
     }
 
     let resultsTable: string[] = ["<tr>"];
@@ -48,15 +48,24 @@ export class ResultViewer {
       resultsTable = ["<tr><th>No Results</th></tr>"];
     }
 
-    this.panels[docName].webview.html = `<!DOCTYPE html>
+    this._panels[docName].webview.html = `<!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Cat Coding</title>
+        <title>Results</title>
         <style>
         th {
             text-align: left;
+            border: 1px solid #adadad;
+            padding: 10px 15px;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        td {
+            border: 1px solid #adadad;
+            padding: 10px 15px;
         }
         </style>
     </head>
@@ -69,7 +78,7 @@ export class ResultViewer {
         </table>
     </body>
     </html>`;
-    this.panels[docName].reveal(vscode.ViewColumn.Beside, true);
-    return this.panels[docName];
+    this._panels[docName].reveal(vscode.ViewColumn.Beside, true);
+    return this._panels[docName];
   }
 }
