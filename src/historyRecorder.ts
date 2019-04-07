@@ -13,7 +13,7 @@ export class HistoryRecorder {
     if (!this._history) {
       let filePath = path.join(this._settingPath, this.fileName);
       if (fs.existsSync(filePath)) {
-        let rawData = fs.readFileSync(filePath).toString();
+        let rawData = fs.readFileSync(filePath, "utf8");
         this._history = JSON.parse(rawData);
       } else {
         this._history = [];
@@ -43,7 +43,8 @@ export class HistoryRecorder {
 
     fs.writeFileSync(
       path.join(this._settingPath, this.fileName),
-      JSON.stringify(this._history)
+      JSON.stringify(this._history),
+      "utf8"
     );
   }
 
