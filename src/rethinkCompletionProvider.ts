@@ -10,12 +10,32 @@ export class RethinkCompletionProvider
     context: vscode.CompletionContext
   ): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList> {
     try {
-      let line = document.lineAt(position).text.substr(0, position.character);
-      line = line.substr(0, line.lastIndexOf("."));
-      let parsedQuery = new Function("r", `return ${line}`).call(this, r);
-      let completionItems: vscode.CompletionItem[] = [];
-      completionItems = this.getAllFunctions(parsedQuery, completionItems);
-      return new vscode.CompletionList(this.unique(completionItems));
+      let linesWeCareAbout = [];
+      for (let i = 0; i <= position.line; i++) {
+        let line = document.lineAt(i).text;
+        if (line.includes(";")) {
+          line = line.substr(line.lastIndexOf(";") + 1);
+          linesWeCareAbout = [];
+        }
+        if (i === position.line) {
+          line = line
+            .substr(0, position.character)
+            .substr(0, line.lastIndexOf("."));
+        }
+        if (line) {
+          linesWeCareAbout.push(line);
+        }
+      }
+      if (linesWeCareAbout.length) {
+        let parsedQuery = new Function(
+          "r",
+          `return ${linesWeCareAbout.join("")}`
+        ).call(this, r);
+        let completionItems: vscode.CompletionItem[] = [];
+        completionItems = this.getAllFunctions(parsedQuery, completionItems);
+        return new vscode.CompletionList(this.unique(completionItems));
+      }
+      return new vscode.CompletionList();
     } catch {
       return new vscode.CompletionList();
     }
