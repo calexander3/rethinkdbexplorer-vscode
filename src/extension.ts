@@ -52,7 +52,13 @@ export function activate(context: vscode.ExtensionContext) {
               let dateExecuted = new Date();
               let executionTime =
                 dateExecuted.getTime() - dateStarted.getTime();
-              outputChannel.appendLine(`${query} took ${executionTime}ms`);
+              outputChannel.appendLine(
+                `${query} took ${executionTime}ms${
+                  Array.isArray(results)
+                    ? " and returned " + results.length + " objects"
+                    : ""
+                }`
+              );
               outputChannel.show(true);
               historyRecorder.SaveHistory({
                 query,
@@ -108,7 +114,13 @@ export function activate(context: vscode.ExtensionContext) {
         outputChannel.appendLine(
           `${item.historyItem.query} took ${
             item.historyItem.executionTime
-          }ms on ${queryDate.toLocaleDateString()} ${queryDate.toLocaleTimeString()}`
+          }ms on ${queryDate.toLocaleDateString()} ${queryDate.toLocaleTimeString()}${
+            Array.isArray(item.historyItem.dataReturned)
+              ? " and returned " +
+                item.historyItem.dataReturned.length +
+                " objects"
+              : ""
+          }`
         );
         outputChannel.show(true);
         let document = await vscode.workspace.openTextDocument({
