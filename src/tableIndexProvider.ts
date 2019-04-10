@@ -10,7 +10,7 @@ export class TableIndexProvider
   readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem | undefined> = this
     ._onDidChangeTreeData.event;
 
-  private _dbInfo: dbTableInfo[] | undefined;
+  private _dbInfo: DbTableInfo[] | undefined;
 
   constructor(
     private _context: vscode.ExtensionContext,
@@ -50,9 +50,9 @@ export class TableIndexProvider
           .map(
             dbTableInfo =>
               new Table(this._context, dbTableInfo.name, dbTableInfo.db, [
-                new Index(this._context, dbTableInfo.primary_key),
+                new Index(this._context, dbTableInfo.primary_key, true),
                 ...dbTableInfo.indexes.map(
-                  index => new Index(this._context, index)
+                  index => new Index(this._context, index, false)
                 )
               ])
           );
@@ -142,7 +142,8 @@ class Table extends vscode.TreeItem {
 class Index extends vscode.TreeItem {
   constructor(
     private _context: vscode.ExtensionContext,
-    private _name: string
+    private _name: string,
+    private _primaryKey: boolean
   ) {
     super(_name, vscode.TreeItemCollapsibleState.None);
   }
@@ -157,15 +158,17 @@ class Index extends vscode.TreeItem {
 
   iconPath = {
     light: this._context.asAbsolutePath(
-      path.join("media", "light", "string.svg")
+      path.join("media", "light", this._primaryKey ? "key.svg" : "string.svg")
     ),
-    dark: this._context.asAbsolutePath(path.join("media", "dark", "string.svg"))
+    dark: this._context.asAbsolutePath(
+      path.join("media", "dark", this._primaryKey ? "key.svg" : "string.svg")
+    )
   };
 
   contextValue = "index";
 }
 
-interface dbTableInfo {
+interface DbTableInfo {
   db: string;
   durability: string;
   id: string;
