@@ -6,6 +6,7 @@ An extension to allow you to query your RethinkDB server from right inside your 
 
 - Query against your RethinkDB server and retreive results in a JSON and tabular format
 - Restore a previous query and its data from a history of your most recent queries
+- View your databases, tables, and indexes
 
 ![RethinkDB Explorer](extension.gif)
 
@@ -26,3 +27,8 @@ This extension is configured through the following settings:
 ### 1.0.0
 
 Initial release
+
+## [1.0.1]
+
+- Improved intellisense
+- Added visual database viewer
