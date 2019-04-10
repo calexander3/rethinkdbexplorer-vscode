@@ -47,13 +47,22 @@ export class TableIndexProvider
       if (element instanceof Database && element.label) {
         return this._dbInfo
           .filter(dbtableInfo => dbtableInfo.db === element.label)
+          .sort((a, b) => {
+            if (a.name < b.name) {
+              return -1;
+            }
+            if (a.name > b.name) {
+              return 1;
+            }
+            return 0;
+          })
           .map(
             dbTableInfo =>
               new Table(this._context, dbTableInfo.name, dbTableInfo.db, [
                 new Index(this._context, dbTableInfo.primary_key, true),
-                ...dbTableInfo.indexes.map(
-                  index => new Index(this._context, index, false)
-                )
+                ...dbTableInfo.indexes
+                  .sort()
+                  .map(index => new Index(this._context, index, false))
               ])
           );
       } else if (element instanceof Table && element.label) {
