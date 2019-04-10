@@ -12,6 +12,7 @@ import { JsonResultViewer } from "./jsonResultViewer";
 import { RethinkCompletionProvider } from "./rethinkCompletionProvider";
 import { TableIndexProvider } from "./tableIndexProvider";
 import { RethinkConnectionBuilder } from "./rethinkConnectionBuilder";
+import { RethinkDBError } from "rethinkdb-ts/lib/error/error";
 
 let executeQueryStatusBarItem: vscode.StatusBarItem;
 let outputChannel: vscode.OutputChannel;
@@ -202,9 +203,12 @@ export function activate(context: vscode.ExtensionContext) {
   );
 }
 
-function displayError(error: Error) {
+function displayError(error: any) {
   if (outputChannel && error) {
     outputChannel.appendLine(error.message);
+    if (error.cause && error.cause.message) {
+      outputChannel.appendLine(`Cause: ${error.cause.message}`);
+    }
     if (error.stack) {
       outputChannel.appendLine(error.stack);
     }
