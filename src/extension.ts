@@ -12,7 +12,6 @@ import { JsonResultViewer } from "./jsonResultViewer";
 import { RethinkCompletionProvider } from "./rethinkCompletionProvider";
 import { TableIndexProvider } from "./tableIndexProvider";
 import { RethinkConnectionBuilder } from "./rethinkConnectionBuilder";
-import { RethinkDBError } from "rethinkdb-ts/lib/error/error";
 
 let executeQueryStatusBarItem: vscode.StatusBarItem;
 let outputChannel: vscode.OutputChannel;
