@@ -47,8 +47,14 @@ export class RethinkCompletionProvider
   ): vscode.CompletionItem[] {
     for (var property in obj) {
       let newCompletionItem = new vscode.CompletionItem(property);
-      if (typeof obj[property] === "function") {
+      if (
+        (obj[property].__proto__ &&
+          obj[property].__proto__.constructor.name === "Function") ||
+        obj[property].__proto__.constructor.name === "ImplicitVar"
+      ) {
         newCompletionItem.kind = vscode.CompletionItemKind.Method;
+      } else if (obj[property].__proto__.constructor.name === "_Class") {
+        newCompletionItem.kind = vscode.CompletionItemKind.EnumMember;
       } else {
         newCompletionItem.kind = vscode.CompletionItemKind.Property;
       }
