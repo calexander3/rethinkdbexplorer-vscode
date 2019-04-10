@@ -154,6 +154,10 @@
     "views": {
       "rethinkdbexplorer": [
         {
+          "id": "rethinkdbexplorerdbviewer",
+          "name": "RethinkDB Explorer"
+        },
+        {
           "id": "rethinkdbexplorerhistory",
           "name": "RethinkDB Query History"
         }

@@ -10,12 +10,15 @@ import {
 import { HistoryRecorder } from "./historyRecorder";
 import { JsonResultViewer } from "./jsonResultViewer";
 import { RethinkCompletionProvider } from "./rethinkCompletionProvider";
+import { TableIndexProvider } from "./tableIndexProvider";
+import { RethinkConnectionBuilder } from "./rethinkConnectionBuilder";
 
 let executeQueryStatusBarItem: vscode.StatusBarItem;
 let outputChannel: vscode.OutputChannel;
 let executeQueryButtonText: string = `$(play) Execute Query`;
 let running: boolean;
-let runner = new RethinkRunner();
+let connectionBuilder = new RethinkConnectionBuilder();
+let runner = new RethinkRunner(connectionBuilder);
 let tableResultViewer = new TableResultViewer();
 let jsonResultsViewer = new JsonResultViewer();
 
@@ -30,6 +33,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   let historyRecorder = new HistoryRecorder(context.globalStoragePath);
   let previousQueryProvider = new PreviousQueryProvider(historyRecorder);
+  let tableIndexProvider = new TableIndexProvider(context, connectionBuilder);
   outputChannel = vscode.window.createOutputChannel("RethinkDB Explorer");
   context.subscriptions.push(
     vscode.commands.registerCommand("rethinkdbExplorer.runQuery", async () => {
@@ -191,6 +195,10 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.window.registerTreeDataProvider(
     "rethinkdbexplorerhistory",
     previousQueryProvider
+  );
+  vscode.window.registerTreeDataProvider(
+    "rethinkdbexplorerdbviewer",
+    tableIndexProvider
   );
 }
 
