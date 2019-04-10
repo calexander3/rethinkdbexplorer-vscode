@@ -1,16 +1,14 @@
-"use strict";
-
 import * as vscode from "vscode";
 import { RethinkRunner } from "./rethinkRunner";
-import { TableResultViewer } from "./tableResultViewer";
+import { TableResultViewer } from "./ResultViewers/tableResultViewer";
 import {
   PreviousQueryProvider,
   PreviousQueryHeader
-} from "./previousQueryProvider";
+} from "./TreeViewProviders/previousQueryProvider";
 import { HistoryRecorder } from "./historyRecorder";
-import { JsonResultViewer } from "./jsonResultViewer";
+import { JsonResultViewer } from "./ResultViewers/jsonResultViewer";
 import { RethinkCompletionProvider } from "./rethinkCompletionProvider";
-import { TableIndexProvider } from "./tableIndexProvider";
+import { TableIndexProvider } from "./TreeViewProviders/tableIndexProvider";
 import { RethinkConnectionBuilder } from "./rethinkConnectionBuilder";
 
 let executeQueryStatusBarItem: vscode.StatusBarItem;
@@ -30,6 +28,20 @@ export function activate(context: vscode.ExtensionContext) {
       "."
     )
   );
+
+  executeQueryStatusBarItem = vscode.window.createStatusBarItem(
+    vscode.StatusBarAlignment.Right,
+    100
+  );
+  executeQueryStatusBarItem.command = "rethinkdbExplorer.runQuery";
+  executeQueryStatusBarItem.text = executeQueryButtonText;
+  if (
+    vscode.window.activeTextEditor &&
+    vscode.window.activeTextEditor.document.languageId === "rethinkdb"
+  ) {
+    executeQueryStatusBarItem.show();
+  }
+  context.subscriptions.push(executeQueryStatusBarItem);
 
   let historyRecorder = new HistoryRecorder(context.globalStoragePath);
   let previousQueryProvider = new PreviousQueryProvider(historyRecorder);
@@ -95,20 +107,6 @@ export function activate(context: vscode.ExtensionContext) {
       }
     })
   );
-
-  executeQueryStatusBarItem = vscode.window.createStatusBarItem(
-    vscode.StatusBarAlignment.Right,
-    100
-  );
-  executeQueryStatusBarItem.command = "rethinkdbExplorer.runQuery";
-  executeQueryStatusBarItem.text = executeQueryButtonText;
-  if (
-    vscode.window.activeTextEditor &&
-    vscode.window.activeTextEditor.document.languageId === "rethinkdb"
-  ) {
-    executeQueryStatusBarItem.show();
-  }
-  context.subscriptions.push(executeQueryStatusBarItem);
 
   context.subscriptions.push(
     vscode.commands.registerCommand(

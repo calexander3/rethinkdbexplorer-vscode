@@ -1,4 +1,3 @@
-"use strict";
 import * as vscode from "vscode";
 import { r, Connection } from "rethinkdb-ts";
 

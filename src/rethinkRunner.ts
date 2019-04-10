@@ -1,4 +1,3 @@
-"use strict";
 import { r, Connection } from "rethinkdb-ts";
 import { RethinkConnectionBuilder } from "./rethinkConnectionBuilder";
 

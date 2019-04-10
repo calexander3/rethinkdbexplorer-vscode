@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { HistoryRecorder, HistoryItem } from "./historyRecorder";
+import { HistoryRecorder, HistoryItem } from "../historyRecorder";
 export class PreviousQueryProvider
   implements vscode.TreeDataProvider<vscode.TreeItem> {
   private _onDidChangeTreeData: vscode.EventEmitter<
