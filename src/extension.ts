@@ -58,7 +58,7 @@ export function activate(context: vscode.ExtensionContext) {
               let executionTime =
                 dateExecuted.getTime() - dateStarted.getTime();
               outputChannel.appendLine(
-                `${query} took ${executionTime}ms${
+                `${query.trim()} took ${executionTime}ms${
                   Array.isArray(results)
                     ? " and returned " + results.length + " objects"
                     : ""
@@ -117,7 +117,7 @@ export function activate(context: vscode.ExtensionContext) {
       async (item: PreviousQueryHeader) => {
         let queryDate = new Date(item.historyItem.dateExecuted);
         outputChannel.appendLine(
-          `${item.historyItem.query} took ${
+          `${item.historyItem.query.trim()} took ${
             item.historyItem.executionTime
           }ms on ${queryDate.toLocaleDateString()} ${queryDate.toLocaleTimeString()}${
             Array.isArray(item.historyItem.dataReturned)
