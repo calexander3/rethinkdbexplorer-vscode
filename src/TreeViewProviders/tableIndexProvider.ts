@@ -97,7 +97,7 @@ class Database extends vscode.TreeItem {
   }
 
   get description(): string {
-    return "";
+    return "Database";
   }
 
   iconPath = {
@@ -112,7 +112,7 @@ class Database extends vscode.TreeItem {
   contextValue = "database";
 }
 
-class Table extends vscode.TreeItem {
+export class Table extends vscode.TreeItem {
   constructor(
     private _context: vscode.ExtensionContext,
     private _name: string,
@@ -127,7 +127,7 @@ class Table extends vscode.TreeItem {
   }
 
   get description(): string {
-    return "";
+    return "Table";
   }
 
   get dbName(): string {
@@ -162,7 +162,7 @@ class Index extends vscode.TreeItem {
   }
 
   get description(): string {
-    return "";
+    return this._primaryKey ? "Primary Key" : "Index";
   }
 
   iconPath = {

@@ -1,14 +1,11 @@
 import * as vscode from "vscode";
 import { RethinkRunner } from "./rethinkRunner";
 import { TableResultViewer } from "./ResultViewers/tableResultViewer";
-import {
-  PreviousQueryProvider,
-  PreviousQueryHeader
-} from "./TreeViewProviders/previousQueryProvider";
+import { PreviousQueryProvider, PreviousQueryHeader } from "./TreeViewProviders/previousQueryProvider";
 import { HistoryRecorder } from "./historyRecorder";
 import { JsonResultViewer } from "./ResultViewers/jsonResultViewer";
 import { RethinkCompletionProvider } from "./rethinkCompletionProvider";
-import { TableIndexProvider } from "./TreeViewProviders/tableIndexProvider";
+import { TableIndexProvider, Table } from "./TreeViewProviders/tableIndexProvider";
 import { RethinkConnectionBuilder } from "./rethinkConnectionBuilder";
 
 let executeQueryStatusBarItem: vscode.StatusBarItem;
@@ -22,23 +19,13 @@ let jsonResultsViewer = new JsonResultViewer();
 
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
-    vscode.languages.registerCompletionItemProvider(
-      "rethinkdb",
-      new RethinkCompletionProvider(),
-      "."
-    )
+    vscode.languages.registerCompletionItemProvider("rethinkdb", new RethinkCompletionProvider(), ".")
   );
 
-  executeQueryStatusBarItem = vscode.window.createStatusBarItem(
-    vscode.StatusBarAlignment.Right,
-    100
-  );
+  executeQueryStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
   executeQueryStatusBarItem.command = "rethinkdbExplorer.runQuery";
   executeQueryStatusBarItem.text = executeQueryButtonText;
-  if (
-    vscode.window.activeTextEditor &&
-    vscode.window.activeTextEditor.document.languageId === "rethinkdb"
-  ) {
+  if (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.languageId === "rethinkdb") {
     executeQueryStatusBarItem.show();
   }
   context.subscriptions.push(executeQueryStatusBarItem);
@@ -53,9 +40,7 @@ export function activate(context: vscode.ExtensionContext) {
         if (vscode.window.activeTextEditor) {
           let currentTextEditor = vscode.window.activeTextEditor;
           let query = currentTextEditor.document.getText(
-            !currentTextEditor.selection.isEmpty
-              ? currentTextEditor.selection
-              : undefined
+            !currentTextEditor.selection.isEmpty ? currentTextEditor.selection : undefined
           );
           running = true;
           executeQueryStatusBarItem.text = `$(flame) Executing...`;
@@ -66,13 +51,10 @@ export function activate(context: vscode.ExtensionContext) {
               displayError(results);
             } else {
               let dateExecuted = new Date();
-              let executionTime =
-                dateExecuted.getTime() - dateStarted.getTime();
+              let executionTime = dateExecuted.getTime() - dateStarted.getTime();
               outputChannel.appendLine(
                 `${query.trim()} took ${executionTime}ms${
-                  Array.isArray(results)
-                    ? " and returned " + results.length + " objects"
-                    : ""
+                  Array.isArray(results) ? " and returned " + results.length + " objects" : ""
                 }`
               );
               outputChannel.show(true);
@@ -109,60 +91,65 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand(
-      "rethinkdbExplorer.restoreHistoryItem",
-      async (item: PreviousQueryHeader) => {
-        let queryDate = new Date(item.historyItem.dateExecuted);
-        outputChannel.appendLine(
-          `${item.historyItem.query.trim()} took ${
-            item.historyItem.executionTime
-          }ms on ${queryDate.toLocaleDateString()} ${queryDate.toLocaleTimeString()}${
-            Array.isArray(item.historyItem.dataReturned)
-              ? " and returned " +
-                item.historyItem.dataReturned.length +
-                " objects"
-              : ""
-          }`
-        );
-        outputChannel.show(true);
-        let document = await vscode.workspace.openTextDocument({
-          language: "rethinkdb",
-          content: item.historyItem.query
-        });
-        let editor = await vscode.window.showTextDocument(document, {
-          viewColumn: vscode.ViewColumn.One,
-          preserveFocus: false
-        });
-        let tableView = tableResultViewer.RenderResults(
-          editor.document.fileName,
-          item.historyItem.dataReturned,
-          new Date(item.historyItem.dateExecuted),
-          vscode.ViewColumn.Beside
-        );
-        await jsonResultsViewer.RenderResults(
-          editor.document.fileName,
-          item.historyItem.dataReturned,
-          tableView.viewColumn || vscode.ViewColumn.Beside
-        );
-      }
-    )
+    vscode.commands.registerCommand("rethinkdbExplorer.selectTop100", async (item: Table) => {
+      let document = await vscode.workspace.openTextDocument({
+        language: "rethinkdb",
+        content: `r.db("${item.dbName}").table("${item.label}").limit(100);`
+      });
+      await vscode.window.showTextDocument(document, {
+        viewColumn: vscode.ViewColumn.Active,
+        preserveFocus: false
+      });
+    })
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand(
-      "rethinkdbExplorer.deleteHistory",
-      async () => {
-        let response = await vscode.window.showWarningMessage(
-          "Are you sure you wish to delete your saved queries?",
-          "Yes",
-          "No"
-        );
-        if (response === "Yes") {
-          historyRecorder.RemoveHistory();
-          previousQueryProvider.refresh();
-        }
+    vscode.commands.registerCommand("rethinkdbExplorer.restoreHistoryItem", async (item: PreviousQueryHeader) => {
+      let queryDate = new Date(item.historyItem.dateExecuted);
+      outputChannel.appendLine(
+        `${item.historyItem.query.trim()} took ${
+          item.historyItem.executionTime
+        }ms on ${queryDate.toLocaleDateString()} ${queryDate.toLocaleTimeString()}${
+          Array.isArray(item.historyItem.dataReturned)
+            ? " and returned " + item.historyItem.dataReturned.length + " objects"
+            : ""
+        }`
+      );
+      outputChannel.show(true);
+      let document = await vscode.workspace.openTextDocument({
+        language: "rethinkdb",
+        content: item.historyItem.query
+      });
+      let editor = await vscode.window.showTextDocument(document, {
+        viewColumn: vscode.ViewColumn.One,
+        preserveFocus: false
+      });
+      let tableView = tableResultViewer.RenderResults(
+        editor.document.fileName,
+        item.historyItem.dataReturned,
+        new Date(item.historyItem.dateExecuted),
+        vscode.ViewColumn.Beside
+      );
+      await jsonResultsViewer.RenderResults(
+        editor.document.fileName,
+        item.historyItem.dataReturned,
+        tableView.viewColumn || vscode.ViewColumn.Beside
+      );
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("rethinkdbExplorer.deleteHistory", async () => {
+      let response = await vscode.window.showWarningMessage(
+        "Are you sure you wish to delete your saved queries?",
+        "Yes",
+        "No"
+      );
+      if (response === "Yes") {
+        historyRecorder.RemoveHistory();
+        previousQueryProvider.refresh();
       }
-    )
+    })
   );
 
   context.subscriptions.push(
@@ -179,25 +166,14 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.workspace.onDidOpenTextDocument(e => {
       if (e && e.languageId === "rethinkdb") {
         executeQueryStatusBarItem.show();
-      } else if (
-        !(
-          (e && e.languageId === "Log") ||
-          (e.isUntitled && e.languageId === "json")
-        )
-      ) {
+      } else if (!((e && e.languageId === "Log") || (e.isUntitled && e.languageId === "json"))) {
         executeQueryStatusBarItem.hide();
       }
     })
   );
 
-  vscode.window.registerTreeDataProvider(
-    "rethinkdbexplorerhistory",
-    previousQueryProvider
-  );
-  vscode.window.registerTreeDataProvider(
-    "rethinkdbexplorerdbviewer",
-    tableIndexProvider
-  );
+  vscode.window.registerTreeDataProvider("rethinkdbexplorerhistory", previousQueryProvider);
+  vscode.window.registerTreeDataProvider("rethinkdbexplorerdbviewer", tableIndexProvider);
 }
 
 function displayError(error: any) {

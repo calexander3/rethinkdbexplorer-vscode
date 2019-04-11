@@ -69,7 +69,7 @@ export class PreviousQueryHeader extends vscode.TreeItem {
   contextValue = "previousQueryHeader";
 }
 
-export class PreviousQuery extends vscode.TreeItem {
+class PreviousQuery extends vscode.TreeItem {
   constructor(private _name: string) {
     super(_name, vscode.TreeItemCollapsibleState.None);
   }

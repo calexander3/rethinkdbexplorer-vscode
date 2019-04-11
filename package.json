@@ -107,6 +107,14 @@
           "light": "media/light/discard.svg",
           "dark": "media/dark/discard.svg"
         }
+      },
+      {
+        "command": "rethinkdbExplorer.selectTop100",
+        "title": "Select Top 100",
+        "icon": {
+          "light": "media/light/select.svg",
+          "dark": "media/dark/select.svg"
+        }
       }
     ],
     "keybindings": [
@@ -125,12 +133,21 @@
         {
           "command": "rethinkdbExplorer.restoreHistoryItem",
           "when": "false"
+        },
+        {
+          "command": "rethinkdbExplorer.selectTop100",
+          "when": "false"
         }
       ],
       "view/item/context": [
         {
           "command": "rethinkdbExplorer.restoreHistoryItem",
           "when": "view == rethinkdbexplorerhistory && viewItem == previousQueryHeader",
+          "group": "inline"
+        },
+        {
+          "command": "rethinkdbExplorer.selectTop100",
+          "when": "view == rethinkdbexplorerdbviewer && viewItem == table",
           "group": "inline"
         }
       ],
