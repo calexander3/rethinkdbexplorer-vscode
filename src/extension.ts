@@ -104,6 +104,12 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   context.subscriptions.push(
+    vscode.commands.registerCommand("rethinkdbExplorer.refreshSchema", () => {
+      tableIndexProvider.reloadSchema();
+    })
+  );
+
+  context.subscriptions.push(
     vscode.commands.registerCommand("rethinkdbExplorer.restoreHistoryItem", async (item: PreviousQueryHeader) => {
       let queryDate = new Date(item.historyItem.dateExecuted);
       outputChannel.appendLine(

@@ -115,6 +115,14 @@
           "light": "media/light/select.svg",
           "dark": "media/dark/select.svg"
         }
+      },
+      {
+        "command": "rethinkdbExplorer.refreshSchema",
+        "title": "Refresh Schema",
+        "icon": {
+          "light": "media/light/refresh.svg",
+          "dark": "media/dark/refresh.svg"
+        }
       }
     ],
     "keybindings": [
@@ -155,6 +163,11 @@
         {
           "command": "rethinkdbExplorer.deleteHistory",
           "when": "view == rethinkdbexplorerhistory",
+          "group": "navigation"
+        },
+        {
+          "command": "rethinkdbExplorer.refreshSchema",
+          "when": "view == rethinkdbexplorerdbviewer",
           "group": "navigation"
         }
       ]

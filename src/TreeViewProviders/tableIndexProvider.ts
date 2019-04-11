@@ -2,23 +2,23 @@ import * as vscode from "vscode";
 import * as path from "path";
 import { RethinkConnectionBuilder } from "../rethinkConnectionBuilder";
 import { r, Connection } from "rethinkdb-ts";
-export class TableIndexProvider
-  implements vscode.TreeDataProvider<vscode.TreeItem> {
-  private _onDidChangeTreeData: vscode.EventEmitter<
+export class TableIndexProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
+  private _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem | undefined> = new vscode.EventEmitter<
     vscode.TreeItem | undefined
-  > = new vscode.EventEmitter<vscode.TreeItem | undefined>();
-  readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem | undefined> = this
-    ._onDidChangeTreeData.event;
+  >();
+  readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem | undefined> = this._onDidChangeTreeData.event;
 
-  private _dbInfo: DbTableInfo[] | undefined;
+  private _dbInfo: DbTableInfo[] | undefined | null;
 
-  constructor(
-    private _context: vscode.ExtensionContext,
-    private _rethinkConnectionBuilder: RethinkConnectionBuilder
-  ) {}
+  constructor(private _context: vscode.ExtensionContext, private _rethinkConnectionBuilder: RethinkConnectionBuilder) {}
 
   refresh(): void {
     this._onDidChangeTreeData.fire();
+  }
+
+  reloadSchema(): void {
+    this._dbInfo = null;
+    this.refresh();
   }
 
   getTreeItem(element: vscode.TreeItem): vscode.TreeItem {
@@ -60,18 +60,14 @@ export class TableIndexProvider
             dbTableInfo =>
               new Table(this._context, dbTableInfo.name, dbTableInfo.db, [
                 new Index(this._context, dbTableInfo.primary_key, true),
-                ...dbTableInfo.indexes
-                  .sort()
-                  .map(index => new Index(this._context, index, false))
+                ...dbTableInfo.indexes.sort().map(index => new Index(this._context, index, false))
               ])
           );
       } else if (element instanceof Table && element.label) {
         return element.indexes;
       }
     } else {
-      return this.unique(this._dbInfo.map(dbtableInfo => dbtableInfo.db)).map(
-        db => new Database(this._context, db)
-      );
+      return this.unique(this._dbInfo.map(dbtableInfo => dbtableInfo.db)).map(db => new Database(this._context, db));
     }
     return [];
   }
@@ -85,10 +81,7 @@ export class TableIndexProvider
 }
 
 class Database extends vscode.TreeItem {
-  constructor(
-    private _context: vscode.ExtensionContext,
-    private _name: string
-  ) {
+  constructor(private _context: vscode.ExtensionContext, private _name: string) {
     super(_name, vscode.TreeItemCollapsibleState.Expanded);
   }
 
@@ -101,12 +94,8 @@ class Database extends vscode.TreeItem {
   }
 
   iconPath = {
-    light: this._context.asAbsolutePath(
-      path.join("media", "light", "database.svg")
-    ),
-    dark: this._context.asAbsolutePath(
-      path.join("media", "dark", "database.svg")
-    )
+    light: this._context.asAbsolutePath(path.join("media", "light", "database.svg")),
+    dark: this._context.asAbsolutePath(path.join("media", "dark", "database.svg"))
   };
 
   contextValue = "database";
@@ -139,9 +128,7 @@ export class Table extends vscode.TreeItem {
   }
 
   iconPath = {
-    light: this._context.asAbsolutePath(
-      path.join("media", "light", "table.svg")
-    ),
+    light: this._context.asAbsolutePath(path.join("media", "light", "table.svg")),
     dark: this._context.asAbsolutePath(path.join("media", "dark", "table.svg"))
   };
 
@@ -149,11 +136,7 @@ export class Table extends vscode.TreeItem {
 }
 
 class Index extends vscode.TreeItem {
-  constructor(
-    private _context: vscode.ExtensionContext,
-    private _name: string,
-    private _primaryKey: boolean
-  ) {
+  constructor(private _context: vscode.ExtensionContext, private _name: string, private _primaryKey: boolean) {
     super(_name, vscode.TreeItemCollapsibleState.None);
   }
 
@@ -166,12 +149,8 @@ class Index extends vscode.TreeItem {
   }
 
   iconPath = {
-    light: this._context.asAbsolutePath(
-      path.join("media", "light", this._primaryKey ? "key.svg" : "string.svg")
-    ),
-    dark: this._context.asAbsolutePath(
-      path.join("media", "dark", this._primaryKey ? "key.svg" : "string.svg")
-    )
+    light: this._context.asAbsolutePath(path.join("media", "light", this._primaryKey ? "key.svg" : "string.svg")),
+    dark: this._context.asAbsolutePath(path.join("media", "dark", this._primaryKey ? "key.svg" : "string.svg"))
   };
 
   contextValue = "index";
