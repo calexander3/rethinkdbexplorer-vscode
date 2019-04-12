@@ -74,6 +74,7 @@ export function activate(context: vscode.ExtensionContext) {
               await jsonResultsViewer.RenderResults(
                 currentTextEditor.document.fileName,
                 results,
+                query,
                 tableView.viewColumn || vscode.ViewColumn.Beside
               );
 
@@ -86,6 +87,10 @@ export function activate(context: vscode.ExtensionContext) {
             running = false;
           }
         }
+      } else {
+        await runner.killConnection();
+        executeQueryStatusBarItem.text = executeQueryButtonText;
+        running = false;
       }
     })
   );
@@ -139,6 +144,7 @@ export function activate(context: vscode.ExtensionContext) {
       await jsonResultsViewer.RenderResults(
         editor.document.fileName,
         item.historyItem.dataReturned,
+        item.historyItem.query,
         tableView.viewColumn || vscode.ViewColumn.Beside
       );
     })
@@ -172,7 +178,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.workspace.onDidOpenTextDocument(e => {
       if (e && e.languageId === "rethinkdb") {
         executeQueryStatusBarItem.show();
-      } else if (!((e && e.languageId === "Log") || (e.isUntitled && e.languageId === "json"))) {
+      } else if (!((e && e.languageId === "Log") || (e.isUntitled && e.languageId === "jsonc"))) {
         executeQueryStatusBarItem.hide();
       }
     })
@@ -180,6 +186,13 @@ export function activate(context: vscode.ExtensionContext) {
 
   vscode.window.registerTreeDataProvider("rethinkdbexplorerhistory", previousQueryProvider);
   vscode.window.registerTreeDataProvider("rethinkdbexplorerdbviewer", tableIndexProvider);
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeConfiguration(e => {
+      if (e.affectsConfiguration("rethinkdbExplorer")) {
+        tableIndexProvider.reloadSchema();
+      }
+    })
+  );
 }
 
 function displayError(error: any) {
