@@ -1,23 +1,38 @@
 import * as vscode from "vscode";
 import { RethinkRunner } from "./rethinkRunner";
 import { TableResultViewer } from "./ResultViewers/tableResultViewer";
-import { PreviousQueryProvider, PreviousQueryHeader } from "./TreeViewProviders/previousQueryProvider";
+import { PreviousQueryTreeProvider, PreviousQueryHeader } from "./TreeViewProviders/previousQueryTreeProvider";
 import { HistoryRecorder } from "./historyRecorder";
 import { JsonResultViewer } from "./ResultViewers/jsonResultViewer";
 import { RethinkCompletionProvider } from "./rethinkCompletionProvider";
-import { TableIndexProvider, Table } from "./TreeViewProviders/tableIndexProvider";
+import { TableIndexTreeProvider, Table } from "./TreeViewProviders/tableIndexTreeProvider";
 import { RethinkConnectionBuilder } from "./rethinkConnectionBuilder";
+import { ConnectionTreeProvider, Server } from "./TreeViewProviders/connectionTreeProvider";
 
 let executeQueryStatusBarItem: vscode.StatusBarItem;
 let outputChannel: vscode.OutputChannel;
 let executeQueryButtonText: string = `$(play) Execute Query`;
 let running: boolean;
-let connectionBuilder = new RethinkConnectionBuilder();
-let runner = new RethinkRunner(connectionBuilder);
+let connectionBuilder: RethinkConnectionBuilder;
+let runner: RethinkRunner;
 let tableResultViewer = new TableResultViewer();
 let jsonResultsViewer = new JsonResultViewer();
 
+const exampleConnectionSettings = `,
+    "rethinkdbExplorer.supplementalConnections": [
+      //{
+        //"rethinkdbExplorer.host": "localhost",
+        //"rethinkdbExplorer.port": 28015,
+        //"rethinkdbExplorer.database": "",
+        //"rethinkdbExplorer.username": "",
+        //"rethinkdbExplorer.password": "",
+        //"rethinkdbExplorer.tls": false
+      //}
+    ]`;
+
 export function activate(context: vscode.ExtensionContext) {
+  connectionBuilder = new RethinkConnectionBuilder(context);
+  runner = new RethinkRunner(connectionBuilder);
   context.subscriptions.push(
     vscode.languages.registerCompletionItemProvider("rethinkdb", new RethinkCompletionProvider(), ".")
   );
@@ -31,8 +46,10 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(executeQueryStatusBarItem);
 
   let historyRecorder = new HistoryRecorder(context.globalStoragePath);
-  let previousQueryProvider = new PreviousQueryProvider(historyRecorder);
-  let tableIndexProvider = new TableIndexProvider(context, connectionBuilder);
+  let previousQueryTreeProvider = new PreviousQueryTreeProvider(historyRecorder);
+  let tableIndexTreeProvider = new TableIndexTreeProvider(context, connectionBuilder);
+  let connectionTreeProvider = new ConnectionTreeProvider(context, connectionBuilder);
+
   outputChannel = vscode.window.createOutputChannel("RethinkDB Explorer");
   context.subscriptions.push(
     vscode.commands.registerCommand("rethinkdbExplorer.runQuery", async () => {
@@ -46,10 +63,11 @@ export function activate(context: vscode.ExtensionContext) {
           executeQueryStatusBarItem.text = `$(flame) Executing...`;
           try {
             let dateStarted = new Date();
-            let { results, serverInfo } = await runner.executeQuery(query);
-            if (results instanceof Error) {
-              displayError(results);
+            let execution = await runner.executeQuery(query);
+            if (execution instanceof Error) {
+              displayError(execution);
             } else {
+              let { results, serverInfo } = execution;
               let dateExecuted = new Date();
               let executionTime = dateExecuted.getTime() - dateStarted.getTime();
               outputChannel.appendLine(
@@ -82,7 +100,7 @@ export function activate(context: vscode.ExtensionContext) {
                 tableView.viewColumn || vscode.ViewColumn.Beside
               );
 
-              previousQueryProvider.refresh();
+              previousQueryTreeProvider.refresh();
             }
           } catch (e) {
             displayError(e);
@@ -114,7 +132,44 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.commands.registerCommand("rethinkdbExplorer.refreshSchema", () => {
-      tableIndexProvider.reloadSchema();
+      tableIndexTreeProvider.reloadSchema();
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("rethinkdbExplorer.changeConnection", (item: Server) => {
+      if (item.label) {
+        connectionBuilder.SelectedConnection = item.label;
+        connectionTreeProvider.reloadConnections();
+        tableIndexTreeProvider.reloadSchema();
+      }
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("rethinkdbExplorer.editConnections", async () => {
+      await vscode.commands.executeCommand("workbench.action.openSettingsJson");
+      setTimeout(async () => {
+        if (vscode.window.visibleTextEditors && vscode.window.visibleTextEditors.length) {
+          let settingsEditors = vscode.window.visibleTextEditors.filter(d =>
+            d.document.fileName.toLocaleLowerCase().endsWith("settings.json")
+          );
+          if (settingsEditors.length) {
+            let currentTextEditor = settingsEditors[0];
+            let currentJson = currentTextEditor.document.getText();
+            if (!currentJson.includes("rethinkdbExplorer.supplementalConnections")) {
+              let position = new vscode.Position(
+                currentJson.substring(0, currentJson.lastIndexOf("}")).split("\n").length - 2,
+                Number.MAX_SAFE_INTEGER
+              );
+              await currentTextEditor.edit(edit => {
+                edit.insert(position, exampleConnectionSettings);
+              });
+              currentTextEditor.revealRange(new vscode.Range(position, position));
+            }
+          }
+        }
+      }, 100);
     })
   );
 
@@ -139,11 +194,12 @@ export function activate(context: vscode.ExtensionContext) {
         viewColumn: vscode.ViewColumn.One,
         preserveFocus: false
       });
+      let resultDate = new Date(item.historyItem.dateExecuted);
       let tableView = tableResultViewer.RenderResults(
         editor.document.fileName,
         item.historyItem.dataReturned,
         item.historyItem.serverInfo,
-        new Date(item.historyItem.dateExecuted),
+        resultDate,
         vscode.ViewColumn.Beside
       );
       await jsonResultsViewer.RenderResults(
@@ -151,7 +207,7 @@ export function activate(context: vscode.ExtensionContext) {
         item.historyItem.dataReturned,
         item.historyItem.query,
         item.historyItem.serverInfo,
-        item.historyItem.dateExecuted,
+        resultDate,
         tableView.viewColumn || vscode.ViewColumn.Beside
       );
     })
@@ -166,7 +222,7 @@ export function activate(context: vscode.ExtensionContext) {
       );
       if (response === "Yes") {
         historyRecorder.RemoveHistory();
-        previousQueryProvider.refresh();
+        previousQueryTreeProvider.refresh();
       }
     })
   );
@@ -191,12 +247,14 @@ export function activate(context: vscode.ExtensionContext) {
     })
   );
 
-  vscode.window.registerTreeDataProvider("rethinkdbexplorerhistory", previousQueryProvider);
-  vscode.window.registerTreeDataProvider("rethinkdbexplorerdbviewer", tableIndexProvider);
+  vscode.window.registerTreeDataProvider("rethinkdbexplorerhistory", previousQueryTreeProvider);
+  vscode.window.registerTreeDataProvider("rethinkdbexplorerdbviewer", tableIndexTreeProvider);
+  vscode.window.registerTreeDataProvider("rethinkdbexplorerconnections", connectionTreeProvider);
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration(e => {
       if (e.affectsConfiguration("rethinkdbExplorer")) {
-        tableIndexProvider.reloadSchema();
+        connectionTreeProvider.reloadConnections();
+        tableIndexTreeProvider.reloadSchema();
       }
     })
   );

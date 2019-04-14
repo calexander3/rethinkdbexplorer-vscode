@@ -65,6 +65,11 @@
           "type": "number",
           "default": 50,
           "description": "How many previous queries to save"
+        },
+        "rethinkdbExplorer.supplementalConnections": {
+          "type": "array",
+          "default": [],
+          "description": "Additional RethinkDB servers you wish to be able to connect to"
         }
       }
     },
@@ -123,6 +128,22 @@
           "light": "media/light/refresh.svg",
           "dark": "media/dark/refresh.svg"
         }
+      },
+      {
+        "command": "rethinkdbExplorer.editConnections",
+        "title": "Add or Edit Connections",
+        "icon": {
+          "light": "media/light/edit.svg",
+          "dark": "media/dark/edit.svg"
+        }
+      },
+      {
+        "command": "rethinkdbExplorer.changeConnection",
+        "title": "Connect",
+        "icon": {
+          "light": "media/light/connect.svg",
+          "dark": "media/dark/connect.svg"
+        }
       }
     ],
     "keybindings": [
@@ -145,6 +166,10 @@
         {
           "command": "rethinkdbExplorer.selectTop100",
           "when": "false"
+        },
+        {
+          "command": "rethinkdbExplorer.changeConnection",
+          "when": "false"
         }
       ],
       "view/item/context": [
@@ -157,6 +182,11 @@
           "command": "rethinkdbExplorer.selectTop100",
           "when": "view == rethinkdbexplorerdbviewer && viewItem == table",
           "group": "inline"
+        },
+        {
+          "command": "rethinkdbExplorer.changeConnection",
+          "when": "view == rethinkdbexplorerconnections && viewItem == server",
+          "group": "inline"
         }
       ],
       "view/title": [
@@ -168,6 +198,11 @@
         {
           "command": "rethinkdbExplorer.refreshSchema",
           "when": "view == rethinkdbexplorerdbviewer",
+          "group": "navigation"
+        },
+        {
+          "command": "rethinkdbExplorer.editConnections",
+          "when": "view == rethinkdbexplorerconnections",
           "group": "navigation"
         }
       ]
@@ -183,6 +218,10 @@
     },
     "views": {
       "rethinkdbexplorer": [
+        {
+          "id": "rethinkdbexplorerconnections",
+          "name": "RethinkDB Connections"
+        },
         {
           "id": "rethinkdbexplorerdbviewer",
           "name": "RethinkDB Explorer"

@@ -1,12 +1,10 @@
 import * as vscode from "vscode";
 import { HistoryRecorder, HistoryItem } from "../historyRecorder";
-export class PreviousQueryProvider
-  implements vscode.TreeDataProvider<vscode.TreeItem> {
-  private _onDidChangeTreeData: vscode.EventEmitter<
+export class PreviousQueryTreeProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
+  private _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem | undefined> = new vscode.EventEmitter<
     vscode.TreeItem | undefined
-  > = new vscode.EventEmitter<vscode.TreeItem | undefined>();
-  readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem | undefined> = this
-    ._onDidChangeTreeData.event;
+  >();
+  readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem | undefined> = this._onDidChangeTreeData.event;
 
   constructor(private _historyRecorder: HistoryRecorder) {}
 
@@ -28,10 +26,7 @@ export class PreviousQueryProvider
           return new PreviousQueryHeader(
             `${dateExecuted.toLocaleDateString()} ${dateExecuted
               .toLocaleTimeString()
-              .replace(" ", "")} - ${historyItem.query.replace(
-              /(\r\n|\n|\r)/gm,
-              ""
-            )}`,
+              .replace(" ", "")} - ${historyItem.query.replace(/(\r\n|\n|\r)/gm, "")}`,
             historyItem
           );
         })
@@ -50,8 +45,8 @@ export class PreviousQueryProvider
 }
 
 export class PreviousQueryHeader extends vscode.TreeItem {
-  constructor(private _name: string, private _historyItem: HistoryItem) {
-    super(_name, vscode.TreeItemCollapsibleState.Collapsed);
+  constructor(name: string, private _historyItem: HistoryItem) {
+    super(name, vscode.TreeItemCollapsibleState.Collapsed);
   }
 
   get historyItem(): HistoryItem {
@@ -59,7 +54,8 @@ export class PreviousQueryHeader extends vscode.TreeItem {
   }
 
   get tooltip(): string {
-    return this._name;
+    let parsedDate = new Date(this._historyItem.dateExecuted);
+    return `${parsedDate.toLocaleDateString()} ${parsedDate.toLocaleTimeString()} - ${this._historyItem.serverInfo}`;
   }
 
   get description(): string {

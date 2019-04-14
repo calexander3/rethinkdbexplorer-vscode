@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import * as path from "path";
 import { RethinkConnectionBuilder } from "../rethinkConnectionBuilder";
 import { r, Connection } from "rethinkdb-ts";
-export class TableIndexProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
+export class TableIndexTreeProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
   private _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem | undefined> = new vscode.EventEmitter<
     vscode.TreeItem | undefined
   >();
