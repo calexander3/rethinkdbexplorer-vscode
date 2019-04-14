@@ -46,7 +46,7 @@ export function activate(context: vscode.ExtensionContext) {
           executeQueryStatusBarItem.text = `$(flame) Executing...`;
           try {
             let dateStarted = new Date();
-            let results = await runner.executeQuery(query);
+            let { results, serverInfo } = await runner.executeQuery(query);
             if (results instanceof Error) {
               displayError(results);
             } else {
@@ -63,11 +63,13 @@ export function activate(context: vscode.ExtensionContext) {
                 dateExecuted,
                 dataReturned: results,
                 executionTime,
-                rowCount: Array.isArray(results) ? results.length : undefined
+                rowCount: Array.isArray(results) ? results.length : undefined,
+                serverInfo
               });
               let tableView = tableResultViewer.RenderResults(
                 currentTextEditor.document.fileName,
                 results,
+                serverInfo,
                 dateExecuted,
                 vscode.ViewColumn.Beside
               );
@@ -75,6 +77,8 @@ export function activate(context: vscode.ExtensionContext) {
                 currentTextEditor.document.fileName,
                 results,
                 query,
+                serverInfo,
+                dateExecuted,
                 tableView.viewColumn || vscode.ViewColumn.Beside
               );
 
@@ -138,6 +142,7 @@ export function activate(context: vscode.ExtensionContext) {
       let tableView = tableResultViewer.RenderResults(
         editor.document.fileName,
         item.historyItem.dataReturned,
+        item.historyItem.serverInfo,
         new Date(item.historyItem.dateExecuted),
         vscode.ViewColumn.Beside
       );
@@ -145,6 +150,8 @@ export function activate(context: vscode.ExtensionContext) {
         editor.document.fileName,
         item.historyItem.dataReturned,
         item.historyItem.query,
+        item.historyItem.serverInfo,
+        item.historyItem.dateExecuted,
         tableView.viewColumn || vscode.ViewColumn.Beside
       );
     })

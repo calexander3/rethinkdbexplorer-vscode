@@ -7,9 +7,11 @@ export class JsonResultViewer {
     docName: string,
     results: any[],
     query: string,
+    serverInfo: string,
+    resultDate: Date,
     viewColumn: vscode.ViewColumn
   ): Promise<vscode.TextEditor> {
-    let comment = `/*${query}*/\n\n`;
+    let comment = `/*\n${resultDate.toLocaleDateString()} ${resultDate.toLocaleTimeString()} - ${serverInfo}\n${query}\n*/\n`;
     if (!this._editors[docName] || this._editors[docName].document.isClosed) {
       let document = await vscode.workspace.openTextDocument({
         language: "jsonc",

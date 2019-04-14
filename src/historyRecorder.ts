@@ -22,9 +22,7 @@ export class HistoryRecorder {
 
   SaveHistory(historyItem: HistoryItem) {
     let config = vscode.workspace.getConfiguration();
-    let maxHistory: number | undefined = config.get(
-      "rethinkdbExplorer.maxHistory"
-    );
+    let maxHistory: number | undefined = config.get("rethinkdbExplorer.maxHistory");
 
     if (!this._history) {
       this._history = this.LoadHistory();
@@ -39,19 +37,12 @@ export class HistoryRecorder {
       fs.mkdirSync(this._settingPath, { recursive: true });
     }
 
-    fs.writeFileSync(
-      path.join(this._settingPath, this.fileName),
-      JSON.stringify(this._history),
-      "utf8"
-    );
+    fs.writeFileSync(path.join(this._settingPath, this.fileName), JSON.stringify(this._history), "utf8");
   }
 
   RemoveHistory() {
     if (fs.existsSync(path.join(this._settingPath, this.fileName))) {
-      fs.writeFileSync(
-        path.join(this._settingPath, this.fileName),
-        JSON.stringify([])
-      );
+      fs.writeFileSync(path.join(this._settingPath, this.fileName), JSON.stringify([]));
     }
     this._history = [];
   }
@@ -63,4 +54,5 @@ export interface HistoryItem {
   dataReturned: any;
   executionTime: number;
   rowCount?: number;
+  serverInfo: string;
 }

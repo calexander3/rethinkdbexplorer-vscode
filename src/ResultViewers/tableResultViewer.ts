@@ -6,6 +6,7 @@ export class TableResultViewer {
   RenderResults(
     docName: string,
     results: any[],
+    serverInfo: string,
     resultDate: Date,
     viewColumn: vscode.ViewColumn
   ): vscode.WebviewPanel {
@@ -70,7 +71,7 @@ export class TableResultViewer {
     </head>
     <body>
         <div>
-        Results from ${resultDate.toLocaleDateString()} ${resultDate.toLocaleTimeString()}
+        Results from ${resultDate.toLocaleDateString()} ${resultDate.toLocaleTimeString()} - ${serverInfo}
         </div>
         <table>
         ${resultsTable.join("")}

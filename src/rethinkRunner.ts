@@ -7,13 +7,14 @@ export class RethinkRunner {
 
   async executeQuery(query: string) {
     let results;
+    let serverInfo: string | undefined;
     if (query) {
       if (query.includes(".run(")) {
         throw new Error("Query cannot contain the run() command");
       }
       try {
         this.connection = await this._rethinkConnectionBuilder.Connect();
-
+        serverInfo = `${this.connection.clientAddress}:${this.connection.clientPort}`;
         let parsedQuery = new Function("r", `return ${query}`).call(this, r);
         results = await parsedQuery.run(this.connection);
       } catch (e) {
@@ -25,7 +26,7 @@ export class RethinkRunner {
         }
       }
     }
-    return results;
+    return { results, serverInfo };
   }
 
   async killConnection() {
