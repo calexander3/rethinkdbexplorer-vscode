@@ -10,6 +10,20 @@ An extension to allow you to query your RethinkDB server from right inside your 
 
 ![RethinkDB Explorer](extension.gif)
 
+## Instructions
+
+Set your default connection settings through the settings page. Once you are connected, all you have to do is change your document type to 'RethinkDB' and the 'Execute Query' button will appear.
+
+![Status Bar](statusbar.png)
+
+If you wish to add more than one connection, click on the pencil icon. This will open the settings.json file and add a template configuration.
+
+![Add Connections](addConnections.png)
+
+To change connection, click on the connect icon next to the server.
+
+![Connect](connect.png)
+
 ## Extension Settings
 
 This extension is configured through the following settings:
@@ -21,6 +35,7 @@ This extension is configured through the following settings:
 - `rethinkdbExplorer.password`: Password to use when connecting to the RethinkDB server.
 - `rethinkdbExplorer.tls`: Connect to RethinkDB over a tls connection. Defaults to `false`.
 - `rethinkdbExplorer.maxHistory`: How many previous queries to save. Defaults to `50`.
+- `rethinkdbExplorer.supplementalConnections`: An array of other connections to use.
 
 ## Release Notes
 
@@ -37,3 +52,7 @@ Initial release
 
 - Improved database viewer
 - Added more output for connection failures
+
+## 1.0.3
+
+- Added support for multiple servers

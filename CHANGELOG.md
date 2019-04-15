@@ -13,3 +13,7 @@
 
 - Improved database viewer
 - Added more output for connection failures
+
+## [1.0.3]
+
+- Added support for multiple servers
