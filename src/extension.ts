@@ -169,7 +169,7 @@ export function activate(context: vscode.ExtensionContext) {
             }
           }
         }
-      }, 100);
+      }, 200);
     })
   );
 
