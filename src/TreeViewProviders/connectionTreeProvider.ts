@@ -35,13 +35,18 @@ export class ConnectionTreeProvider implements vscode.TreeDataProvider<vscode.Tr
     let selectedConnection = this._rethinkConnectionBuilder.SelectedConnection;
     return this._connectionInfo.map(c => {
       let connectionName = `${c.host}:${c.port}`;
-      return new Server(connectionName, selectedConnection === connectionName, this._context);
+      return new Server(connectionName, c.nickname, selectedConnection === connectionName, this._context);
     });
   }
 }
 
 export class Server extends vscode.TreeItem {
-  constructor(private _name: string, private _connected: boolean, private _context: vscode.ExtensionContext) {
+  constructor(
+    private _name: string,
+    private _nickname: string,
+    private _connected: boolean,
+    private _context: vscode.ExtensionContext
+  ) {
     super(_name, vscode.TreeItemCollapsibleState.None);
   }
 
@@ -50,7 +55,7 @@ export class Server extends vscode.TreeItem {
   }
 
   get description(): string {
-    return this._connected ? "Connected" : "";
+    return this._connected ? `${this._nickname ? `${this._nickname} - ` : ""}Connected` : this._nickname;
   }
 
   iconPath = {

@@ -26,6 +26,7 @@ const exampleConnectionSettings = `,
         //"rethinkdbExplorer.database": "",
         //"rethinkdbExplorer.username": "",
         //"rethinkdbExplorer.password": "",
+        //"rethinkdbExplorer.connectionNickname": "",
         //"rethinkdbExplorer.tls": false
       //}
     ]`;

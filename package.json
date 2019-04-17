@@ -61,6 +61,11 @@
           "default": false,
           "description": "Connect to RethinkDB over a tls connection"
         },
+        "rethinkdbExplorer.connectionNickname": {
+          "type": "string",
+          "default": "",
+          "description": "A human readable name for this connection"
+        },
         "rethinkdbExplorer.maxHistory": {
           "type": "number",
           "default": 50,

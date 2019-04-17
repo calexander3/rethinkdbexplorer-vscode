@@ -27,6 +27,7 @@ export class RethinkConnectionBuilder {
     let tls: boolean = config.get("rethinkdbExplorer.tls", false);
     let username: string | undefined = config.get("rethinkdbExplorer.username");
     let password: string | undefined = config.get("rethinkdbExplorer.password");
+    let connectionNickname: string | undefined = config.get("rethinkdbExplorer.connectionNickname");
     let supplementalConnections = config.get("rethinkdbExplorer.supplementalConnections", []);
     return [
       {
@@ -35,7 +36,8 @@ export class RethinkConnectionBuilder {
         db: !!database ? database : undefined,
         tls,
         user: !!username ? username : undefined,
-        password: !!password ? password : undefined
+        password: !!password ? password : undefined,
+        nickname: !!connectionNickname ? connectionNickname : undefined
       },
       ...supplementalConnections.map(s => {
         return {
@@ -44,7 +46,8 @@ export class RethinkConnectionBuilder {
           db: !!s["rethinkdbExplorer.database"] ? s["rethinkdbExplorer.database"] : undefined,
           tls: s["rethinkdbExplorer.tls"] || false,
           user: !!s["rethinkdbExplorer.username"] ? s["rethinkdbExplorer.username"] : undefined,
-          password: !!s["rethinkdbExplorer.password"] ? s["rethinkdbExplorer.password"] : undefined
+          password: !!s["rethinkdbExplorer.password"] ? s["rethinkdbExplorer.password"] : undefined,
+          nickname: !!s["rethinkdbExplorer.connectionNickname"] ? s["rethinkdbExplorer.connectionNickname"] : undefined
         };
       })
     ];
