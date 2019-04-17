@@ -2,15 +2,58 @@ import * as vscode from "vscode";
 import * as path from "path";
 import { RethinkConnectionBuilder } from "../rethinkConnectionBuilder";
 import { r, Connection } from "rethinkdb-ts";
+
 export class TableIndexTreeProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
   private _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem | undefined> = new vscode.EventEmitter<
     vscode.TreeItem | undefined
   >();
   readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem | undefined> = this._onDidChangeTreeData.event;
 
-  private _dbInfo: DbTableInfo[] | undefined | null;
+  private _dbInfo: DbInfo[] | undefined | null;
+  private _tableInfo: { [id: string]: TableInfo | null } = {};
 
   constructor(private _context: vscode.ExtensionContext, private _rethinkConnectionBuilder: RethinkConnectionBuilder) {}
+
+  private async loadDbInfo(): Promise<DbInfo[]> {
+    let connection: Connection | undefined;
+    let dbInfo = [];
+    try {
+      connection = await this._rethinkConnectionBuilder.Connect();
+      let databases: string[] = await r.dbList().run(connection);
+      for (let i = 0; i < databases.length; i++) {
+        let tableList: string[] = await r
+          .db(databases[i])
+          .tableList()
+          .run(connection);
+        dbInfo.push({ name: databases[i], tables: tableList });
+      }
+    } catch {
+      return [];
+    } finally {
+      if (connection) {
+        await connection.close();
+      }
+    }
+    return dbInfo;
+  }
+
+  private async loadTableInfo(tableName: string, dbName: string): Promise<TableInfo> {
+    let connection: Connection | undefined;
+    try {
+      connection = await this._rethinkConnectionBuilder.Connect();
+      return await r
+        .db(dbName)
+        .table(tableName)
+        .info()
+        .run(connection);
+    } catch {
+      return { name: tableName, db: { name: dbName }, indexes: [] };
+    } finally {
+      if (connection) {
+        await connection.close();
+      }
+    }
+  }
 
   refresh(): void {
     this._onDidChangeTreeData.fire();
@@ -18,6 +61,7 @@ export class TableIndexTreeProvider implements vscode.TreeDataProvider<vscode.Tr
 
   reloadSchema(): void {
     this._dbInfo = null;
+    this._tableInfo = {};
     this.refresh();
   }
 
@@ -27,56 +71,29 @@ export class TableIndexTreeProvider implements vscode.TreeDataProvider<vscode.Tr
 
   async getChildren(element?: vscode.TreeItem): Promise<vscode.TreeItem[]> {
     if (!this._dbInfo) {
-      let connection: Connection | undefined;
-      try {
-        connection = await this._rethinkConnectionBuilder.Connect();
-        this._dbInfo = await r
-          .db("rethinkdb")
-          .table("table_config")
-          .run(connection);
-      } catch {
-        this._dbInfo = [];
-      } finally {
-        if (connection) {
-          await connection.close();
-        }
-      }
+      this._dbInfo = await this.loadDbInfo();
     }
-
-    if (element) {
-      if (element instanceof Database && element.label) {
-        return this._dbInfo
-          .filter(dbtableInfo => dbtableInfo.db === element.label)
-          .sort((a, b) => {
-            if (a.name < b.name) {
-              return -1;
-            }
-            if (a.name > b.name) {
-              return 1;
-            }
-            return 0;
-          })
-          .map(
-            dbTableInfo =>
-              new Table(this._context, dbTableInfo.name, dbTableInfo.db, [
-                new Index(this._context, dbTableInfo.primary_key, true),
-                ...dbTableInfo.indexes.sort().map(index => new Index(this._context, index, false))
-              ])
-          );
-      } else if (element instanceof Table && element.label) {
-        return element.indexes;
+    if (!element) {
+      return this._dbInfo.map(db => new Database(this._context, db.name));
+    }
+    if (element && element instanceof Database) {
+      let dbInfo = this._dbInfo.filter(db => db.name === element.label)[0];
+      return dbInfo.tables.map(t => new Table(this._context, t, dbInfo.name));
+    }
+    if (element && element instanceof Table) {
+      if (!this._tableInfo[`${element.dbName}.${element.label}`]) {
+        this._tableInfo[`${element.dbName}.${element.label}`] = await this.loadTableInfo(
+          element.label || "",
+          element.dbName
+        );
       }
-    } else {
-      return this.unique(this._dbInfo.map(dbtableInfo => dbtableInfo.db)).map(db => new Database(this._context, db));
+      let tableInfo = this._tableInfo[`${element.dbName}.${element.label}`] || {};
+      return [
+        new Index(this._context, tableInfo.primary_key || "id", true),
+        ...(tableInfo.indexes || []).map(index => new Index(this._context, index, false))
+      ];
     }
     return [];
-  }
-
-  private unique(a: Array<string>) {
-    var seen: { [id: string]: boolean } = {};
-    return a.filter(item => {
-      return seen.hasOwnProperty(item) ? false : (seen[item] = true);
-    });
   }
 }
 
@@ -102,12 +119,7 @@ class Database extends vscode.TreeItem {
 }
 
 export class Table extends vscode.TreeItem {
-  constructor(
-    private _context: vscode.ExtensionContext,
-    private _name: string,
-    private _dbName: string,
-    private _indexes: Index[]
-  ) {
+  constructor(private _context: vscode.ExtensionContext, private _name: string, private _dbName: string) {
     super(_name, vscode.TreeItemCollapsibleState.Collapsed);
   }
 
@@ -121,10 +133,6 @@ export class Table extends vscode.TreeItem {
 
   get dbName(): string {
     return this._dbName;
-  }
-
-  get indexes(): Index[] {
-    return this._indexes;
   }
 
   iconPath = {
@@ -156,12 +164,21 @@ class Index extends vscode.TreeItem {
   contextValue = "index";
 }
 
-interface DbTableInfo {
-  db: string;
-  durability: string;
-  id: string;
-  indexes: string[];
+interface DbInfo {
+  tables: string[];
   name: string;
-  primary_key: string;
-  write_acks: string;
+}
+
+interface TableInfo {
+  name?: string;
+  db?: {
+    id?: string;
+    name?: string;
+    type?: string;
+  };
+  id?: string;
+  indexes?: string[];
+  primary_key?: string;
+  type?: string;
+  doc_count_estimates?: number[];
 }
