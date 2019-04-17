@@ -33,6 +33,7 @@ This extension is configured through the following settings:
 - `rethinkdbExplorer.database`: Default database to connect to.
 - `rethinkdbExplorer.username`: Username to use when connecting to the RethinkDB server.
 - `rethinkdbExplorer.password`: Password to use when connecting to the RethinkDB server.
+- `rethinkdbExplorer.connectionNickname`: A human readable name for the connection.
 - `rethinkdbExplorer.tls`: Connect to RethinkDB over a tls connection. Defaults to `false`.
 - `rethinkdbExplorer.maxHistory`: How many previous queries to save. Defaults to `50`.
 - `rethinkdbExplorer.supplementalConnections`: An array of other connections to use.
@@ -56,3 +57,9 @@ Initial release
 ## 1.0.3
 
 - Added support for multiple servers
+
+## 1.0.4
+
+- Fixed issue with settings template
+- Fixed issue where you could not load table schema if you were not an admin user
+- Added connection nickname support

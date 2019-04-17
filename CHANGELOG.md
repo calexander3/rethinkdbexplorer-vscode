@@ -17,3 +17,9 @@
 ## [1.0.3]
 
 - Added support for multiple servers
+
+## [1.0.4]
+
+- Fixed issue with settings template
+- Fixed issue where you could not load table schema if you were not an admin user
+- Added connection nickname support
