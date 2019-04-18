@@ -15,7 +15,7 @@ export class RethinkRunner {
       try {
         this.connection = await this._rethinkConnectionBuilder.Connect();
         serverInfo = `${this.connection.clientAddress}:${this.connection.clientPort}`;
-        let parsedQuery = new Function("r", `return ${query}`).call(this, r);
+        let parsedQuery = new Function("r", `return ${query.trim()}`).call(this, r);
         results = await parsedQuery.run(this.connection);
       } catch (e) {
         return e;
