@@ -23,3 +23,7 @@
 - Fixed issue with settings template
 - Fixed issue where you could not load table schema if you were not an admin user
 - Added connection nickname support
+
+## [1.0.5]
+
+- Bug fixes
