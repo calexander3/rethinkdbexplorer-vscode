@@ -1,8 +1,7 @@
 import * as vscode from "vscode";
 import * as r from "rethinkdb";
 
-export class RethinkCompletionProvider
-  implements vscode.CompletionItemProvider {
+export class RethinkCompletionProvider implements vscode.CompletionItemProvider {
   provideCompletionItems(
     document: vscode.TextDocument,
     position: vscode.Position,
@@ -13,24 +12,22 @@ export class RethinkCompletionProvider
       let linesWeCareAbout = [];
       for (let i = 0; i <= position.line; i++) {
         let line = document.lineAt(i).text;
+        if (i === position.line) {
+          line = line.substr(0, position.character);
+          line = line.substr(0, line.lastIndexOf("."));
+          linesWeCareAbout.push(line);
+          break;
+        }
         if (line.includes(";")) {
           line = line.substr(line.lastIndexOf(";") + 1);
           linesWeCareAbout = [];
-        }
-        if (i === position.line) {
-          line = line
-            .substr(0, position.character)
-            .substr(0, line.lastIndexOf("."));
         }
         if (line) {
           linesWeCareAbout.push(line);
         }
       }
       if (linesWeCareAbout.length) {
-        let parsedQuery = new Function(
-          "r",
-          `return ${linesWeCareAbout.join("")}`
-        ).call(this, r);
+        let parsedQuery = new Function("r", `return ${linesWeCareAbout.join("")}`).call(this, r);
         let completionItems: vscode.CompletionItem[] = [];
         completionItems = this.getAllFunctions(parsedQuery, completionItems);
         return new vscode.CompletionList(this.unique(completionItems));
@@ -41,15 +38,11 @@ export class RethinkCompletionProvider
     }
   }
 
-  private getAllFunctions(
-    obj: any,
-    items: vscode.CompletionItem[]
-  ): vscode.CompletionItem[] {
+  private getAllFunctions(obj: any, items: vscode.CompletionItem[]): vscode.CompletionItem[] {
     for (var property in obj) {
       let newCompletionItem = new vscode.CompletionItem(property);
       if (
-        (obj[property].__proto__ &&
-          obj[property].__proto__.constructor.name === "Function") ||
+        (obj[property].__proto__ && obj[property].__proto__.constructor.name === "Function") ||
         obj[property].__proto__.constructor.name === "ImplicitVar"
       ) {
         newCompletionItem.kind = vscode.CompletionItemKind.Method;
@@ -69,9 +62,7 @@ export class RethinkCompletionProvider
   private unique(a: Array<vscode.CompletionItem>) {
     var seen: { [id: string]: boolean } = {};
     return a.filter(item => {
-      return item.label.startsWith("_") || seen.hasOwnProperty(item.label)
-        ? false
-        : (seen[item.label] = true);
+      return item.label.startsWith("_") || seen.hasOwnProperty(item.label) ? false : (seen[item.label] = true);
     });
   }
 }
