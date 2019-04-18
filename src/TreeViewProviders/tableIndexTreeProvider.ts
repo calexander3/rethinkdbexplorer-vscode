@@ -19,7 +19,7 @@ export class TableIndexTreeProvider implements vscode.TreeDataProvider<vscode.Tr
     let dbInfo = [];
     try {
       connection = await this._rethinkConnectionBuilder.Connect();
-      let databases: string[] = await r.dbList().run(connection);
+      let databases: string[] = (await r.dbList().run(connection)).filter(db => db !== "rethinkdb");
       for (let i = 0; i < databases.length; i++) {
         let tableList: string[] = await r
           .db(databases[i])
