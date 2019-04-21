@@ -61,10 +61,23 @@ export class TableResultViewer {
         th {
             text-align: left;
             border: 1px solid #adadad;
+            background: var(--vscode-editor-background);
             padding: 10px 15px;
+            position: sticky;
+            top: -1px;
+            z-index: 2;
+        }
+        th:after{
+          content:'';
+          position:absolute;
+          left: 0;
+          bottom: 0;
+          width:100%;
+          border-bottom: 1px solid #adadad;
         }
         table {
             border-collapse: collapse;
+            overflow: scroll;
         }
         td {
             border: 1px solid #adadad;
