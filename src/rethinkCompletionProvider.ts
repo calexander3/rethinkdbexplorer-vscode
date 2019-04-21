@@ -60,7 +60,7 @@ export class RethinkCompletionProvider implements vscode.CompletionItemProvider 
   }
 
   private unique(a: Array<vscode.CompletionItem>) {
-    var seen: { [id: string]: boolean } = {};
+    var seen: { [id: string]: boolean } = { run: true };
     return a.filter(item => {
       return item.label.startsWith("_") || seen.hasOwnProperty(item.label) ? false : (seen[item.label] = true);
     });
