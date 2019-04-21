@@ -30,17 +30,20 @@ export class TableResultViewer {
 
     let resultsTable: string[] = ["<tr>"];
     if (results && Array.isArray(results) && results.length) {
-      for (let prop in results[0]) {
+      let properties: string[] = [];
+      for (let prop in this.Flatten(results[results.length - 1])) {
         resultsTable.push(`<th>${prop}</th>`);
+        properties.push(prop);
       }
       resultsTable.push("</tr>");
       for (let result of results) {
         resultsTable.push("<tr>");
-        for (let value of Object.values(result)) {
-          if (typeof value === "object") {
-            value = JSON.stringify(value);
+        let flattenedResult = this.Flatten(result);
+        for (let prop of properties) {
+          if (typeof flattenedResult[prop] === "object") {
+            flattenedResult[prop] = JSON.stringify(flattenedResult[prop]);
           }
-          resultsTable.push(`<td>${value}</td>`);
+          resultsTable.push(`<td>${flattenedResult[prop]}</td>`);
         }
         resultsTable.push("</tr>");
       }
@@ -79,5 +82,21 @@ export class TableResultViewer {
     </body>
     </html>`;
     return this._panels[docName];
+  }
+
+  private Flatten(obj: any) {
+    var res: any = {};
+    (function recurse(obj: any, current?: string) {
+      for (var key in obj) {
+        var value = obj[key];
+        var newKey = current ? `${current}.${key}` : key;
+        if (value && typeof value === "object" && !Array.isArray(value)) {
+          recurse(value, newKey);
+        } else {
+          res[newKey] = value;
+        }
+      }
+    })(obj);
+    return res;
   }
 }
