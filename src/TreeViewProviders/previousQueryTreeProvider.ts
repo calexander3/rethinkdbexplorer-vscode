@@ -20,7 +20,7 @@ export class PreviousQueryTreeProvider implements vscode.TreeDataProvider<vscode
     let history = this._historyRecorder.LoadHistory();
     if (!element) {
       return Promise.resolve(
-        history.map((h, i) => {
+        history.map((_, i) => {
           let historyItem = history[history.length - 1 - i];
           let dateExecuted = new Date(historyItem.dateExecuted);
           return new PreviousQueryHeader(

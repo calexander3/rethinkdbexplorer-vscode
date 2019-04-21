@@ -4,9 +4,7 @@ import * as r from "rethinkdb";
 export class RethinkCompletionProvider implements vscode.CompletionItemProvider {
   provideCompletionItems(
     document: vscode.TextDocument,
-    position: vscode.Position,
-    token: vscode.CancellationToken,
-    context: vscode.CompletionContext
+    position: vscode.Position
   ): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList> {
     try {
       let linesWeCareAbout = [];
