@@ -29,7 +29,10 @@ export class TableResultViewer {
     }
 
     let resultsTable: string[] = ["<tr>"];
-    if (results && Array.isArray(results) && results.length) {
+    if (results) {
+      if (!Array.isArray(results)) {
+        results = [results];
+      }
       let properties: string[] = [];
       for (let prop in this.Flatten(results[results.length - 1])) {
         resultsTable.push(`<th>${prop}</th>`);
