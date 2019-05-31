@@ -71,3 +71,7 @@ Initial release
 ## 1.0.6
 
 - Improved table view
+
+## 1.0.7
+
+- Single records now display in table view
